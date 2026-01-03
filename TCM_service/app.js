@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 初始化聊天機器人
     initChatbot();
 
+    // 初始化手機側邊欄
+    initMobileSidebar();
+
     // 載入藥材資料
     await loadHerbsData();
 
@@ -501,6 +504,48 @@ function setupImageNavigation(herb) {
         });
 
         navContainer.appendChild(dot);
+    });
+}
+
+// ========== 手機側邊欄功能 ==========
+function initMobileSidebar() {
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const overlay = document.getElementById('sidebar-overlay');
+    const navItems = document.querySelectorAll('.nav-item');
+    const appContainer = document.querySelector('.app-container');
+
+    if (!toggleBtn) return;
+
+    // Toggle sidebar
+    toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.body.classList.toggle('sidebar-open');
+    });
+
+    // Close on overlay click
+    if (overlay) {
+        overlay.addEventListener('click', () => {
+            document.body.classList.remove('sidebar-open');
+        });
+    }
+
+    // Close on nav item click (mobile only)
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                document.body.classList.remove('sidebar-open');
+            }
+        });
+    });
+
+    // Close when clicking outside (general safety)
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 && 
+            document.body.classList.contains('sidebar-open') && 
+            !e.target.closest('.sidebar') && 
+            e.target !== toggleBtn) {
+            document.body.classList.remove('sidebar-open');
+        }
     });
 }
 
