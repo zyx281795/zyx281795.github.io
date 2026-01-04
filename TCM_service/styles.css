@@ -652,6 +652,28 @@ body {
     backdrop-filter: blur(2px);
 }
 
+/* PDF 卡片樣式 */
+.pdf-card {
+    height: 800px;
+    position: relative;
+}
+
+.pdf-card embed {
+    display: block;
+}
+
+/* 平板設備 */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .pdf-card {
+        height: 600px !important;
+    }
+
+    .pdf-card embed {
+        height: 600px !important;
+    }
+}
+
+/* 手機設備 */
 @media (max-width: 768px) {
     .sidebar-toggle {
         display: flex;
@@ -682,7 +704,7 @@ body {
         width: 100%;
         margin-left: 0;
     }
-    
+
     .main-header {
         padding-left: 64px; /* Space for toggle button */
     }
@@ -698,13 +720,35 @@ body {
     .user-details {
         display: none;
     }
-    
+
+    /* PDF 卡片在手機上的高度 */
+    .pdf-card {
+        height: 500px !important;
+        min-height: 500px;
+    }
+
+    .pdf-card embed {
+        min-height: 500px !important;
+        height: 500px !important;
+    }
+
+    /* 在手機上顯示 PDF 下載提示 */
+    .pdf-fallback {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pdf-card embed {
+        display: none !important;
+    }
+
     /* Adjust modal for mobile */
     .modal-content {
         width: 95%;
         max-height: 85vh;
     }
-    
+
     .modal-image-section {
         height: 200px;
     }

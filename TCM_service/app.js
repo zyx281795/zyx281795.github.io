@@ -30,6 +30,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const oldStatusBar = document.getElementById('app-status-bar');
     if (oldStatusBar) oldStatusBar.remove();
 
+    // 初始化側邊欄（手機版漢堡選單）
+    initSidebar();
+
     // 初始化導航
     initNavigation();
 
@@ -54,6 +57,50 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ========== 狀態列功能 (已移除顯示，保留 Console Log) ==========
 function updateStatus(message, type = 'info') {
     console.log(`[System Status] ${message}`);
+}
+
+// ========== 側邊欄功能（手機版漢堡選單）==========
+function initSidebar() {
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    const overlay = document.getElementById('sidebar-overlay');
+    const appContainer = document.querySelector('.app-container');
+
+    if (!toggleBtn || !overlay) {
+        console.log('側邊欄元素未找到，跳過初始化');
+        return;
+    }
+
+    // 切換側邊欄
+    function toggleSidebar() {
+        appContainer.classList.toggle('sidebar-open');
+        console.log('側邊欄狀態切換:', appContainer.classList.contains('sidebar-open'));
+    }
+
+    // 關閉側邊欄
+    function closeSidebar() {
+        appContainer.classList.remove('sidebar-open');
+    }
+
+    // 漢堡按鈕點擊
+    toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleSidebar();
+    });
+
+    // 遮罩層點擊
+    overlay.addEventListener('click', closeSidebar);
+
+    // 點擊導航項目後關閉側邊欄（手機版）
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                closeSidebar();
+            }
+        });
+    });
+
+    console.log('側邊欄功能初始化完成');
 }
 
 // ========== 導航功能 ==========
