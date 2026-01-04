@@ -1306,28 +1306,7 @@ async function handleChatSubmit() {
     }
 }
 
-function generateMockResponse(input) {
-    const text = input.toLowerCase();
-    
-    if (text.includes('當歸')) {
-        return "【BianCang-Qwen2-7B 推論結果】\n\n當歸\n性味：甘、辛，溫。\n歸經：歸肝、心、脾經。\n功效：補血活血，調經止痛，潤腸通便。\n\n主治：用於血虛萎黃、眩暈心悸、月經不調、經閉痛經、虛寒腹痛、腸燥便秘、風濕痹痛、跌撲損傷、癰疽瘡瘍。酒當歸活血通經；土炒當歸不滑腸。";
-    }
-    if (text.includes('黃耆') || text.includes('黃芪')) {
-        return "【BianCang-Qwen2-7B 推論結果】\n\n黃耆\n性味：甘，微溫。\n歸經：歸脾、肺經。\n功效：補氣昇陽，固表止汗，利水消腫，生津養血，行滯通痹，托毒排膿，斂瘡生肌。\n\n主治：氣虛乏力、食少便溏、中氣下陷、久瀉脫肛、便血崩漏、表虛自汗、氣虛水腫、內熱消渴。";
-    }
-    if (text.includes('人參')) {
-        return "【BianCang-Qwen2-7B 推論結果】\n\n人參\n性味：甘、微苦，微溫。\n歸經：歸脾、肺、心、腎經。\n功效：大補元氣，復脈固脫，補脾益肺，生津養血，安神益智。\n\n主治：體虛欲脫、肢冷脈微、脾虛食少、肺虛喘咳、津傷口渴、內熱消渴、氣血虧虛、久病虛羸、驚悸失眠。";
-    }
-    if (text.includes('四君子湯')) {
-        return "【BianCang-Qwen2-7B 推論結果】\n\n四君子湯\n出處：《太平惠民和劑局方》\n組成：人參、白朮、茯苓、甘草。\n功效：益氣健脾。\n主治：脾胃氣虛證。面色萎白，語聲低微，氣短乏力，食少便溏，舌淡苔白，脈虛弱。";
-    }
-    if (text.includes('歸經')) {
-        return "【BianCang-Qwen2-7B 推論結果】\n\n在中醫理論中，「歸經」是指藥物對於機體某部分的選擇性作用，即某藥對某些臟腑經絡有特殊的親和作用，因而對這些部位的病變起著主要或特殊的治療作用。例如：麻黃歸肺、膀胱經，故能發汗解表、宣肺平喘、利水消腫。";
-    }
 
-    // Default Fallback
-    return "【BianCang-Qwen2-7B 推論結果】\n\n收到您的提問：「" + input + "」\n\n根據中醫藥材知識庫分析，此問題涉及中醫基礎理論與臨床應用。由於目前雲端算力負載較高，系統正以離線模式運行。\n\n建議您詢問具體藥材（如：當歸、黃耆）或方劑名稱，我能為您提供更精確的性味、歸經與功效解析。";
-}
 
 function addMessage(text, sender, isLoading = false) {
     const container = document.getElementById('chat-messages');
