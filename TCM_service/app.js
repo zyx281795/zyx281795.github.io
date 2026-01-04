@@ -1363,7 +1363,7 @@ function updateDashboardExamStats() {
 const SYSTEM_CONFIG = {
     // 您的 Hugging Face Space ID (例如: "username/space-name")
     // 請參閱 README_MODEL_DEPLOY.md 了解如何獲取
-    hfSpaceId: "Qwen/Qwen2.5-7B-Instruct", // 預設先用官方 Demo 測試，請更換為您的 Space ID
+    hfSpaceId: "Atypical281795/CSMU_TCM_Project", // 已更新為您的 Space ID
     useCustomModel: true, // 切換開關：true = 使用自定義模型, false = 使用 Gemini (備用)
     apiKey: 'AIzaSyDsI1HPKterSkt-E5mNiIF7xvs3TK0HAiw' // Gemini Key (備用)
 };
