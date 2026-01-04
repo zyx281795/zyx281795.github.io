@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('中醫藥材知識系統啟動中...');
 
     // 初始化狀態列
-    initStatusBar();
+    // initStatusBar();
 
     // 初始化導航
     initNavigation();
@@ -89,6 +89,8 @@ function initStatusBar() {
 }
 
 function updateStatus(message, type = 'info') {
+    // Status bar disabled by user request
+    /*
     const statusMsg = document.getElementById('status-message');
     if (statusMsg) {
         statusMsg.textContent = message;
@@ -100,6 +102,7 @@ function updateStatus(message, type = 'info') {
             statusMsg.style.color = '#d6d3d1';
         }
     }
+    */
     console.log(`[System Status] ${message}`);
 }
 
@@ -682,8 +685,12 @@ function initYiBianCategories() {
         const formulaCats = new Set();
         if (YiBianState.allData.formulas) {
             YiBianState.allData.formulas.forEach(f => {
-                if (f.categories && Array.isArray(f.categories)) {
-                    f.categories.forEach(c => formulaCats.add(c));
+                if (f.categories) {
+                    if (Array.isArray(f.categories)) {
+                        f.categories.forEach(c => formulaCats.add(c));
+                    } else if (typeof f.categories === 'string') {
+                        f.categories.split(',').forEach(c => formulaCats.add(c.trim()));
+                    }
                 } else if (f.category) {
                     formulaCats.add(f.category);
                 }
@@ -964,7 +971,14 @@ function openYiBianModal(item) {
         tag.textContent = item.category;
         categoryContainer.appendChild(tag);
     } else if (!isHerb && item.categories) {
-        item.categories.forEach(cat => {
+        let cats = [];
+        if (Array.isArray(item.categories)) {
+            cats = item.categories;
+        } else if (typeof item.categories === 'string') {
+            cats = item.categories.split(',').map(c => c.trim());
+        }
+        
+        cats.forEach(cat => {
             const tag = document.createElement('span');
             tag.className = 'yibian-category-tag';
             tag.textContent = cat;
