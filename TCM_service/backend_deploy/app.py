@@ -18,19 +18,20 @@ try:
     # 載入 Tokenizer
     tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, trust_remote_code=True)
 
-    # 載入模型 (使用 GPU)
-    # 如果是免費的 CPU Space，請將 device_map="auto" 改為 device="cpu" 並移除 torch_dtype
-    # 但強烈建議使用 T4 GPU (Hugging Face 上有提供)
+    # 載入模型
+    # 強制使用 CPU 模式以避免在免費用戶端出現 CUDA Out of Memory
+    # 如果您有 GPU (T4/A10G)，可將 device_map 改為 "auto" 並取消註解 torch_dtype
+    print("Loading model on CPU (this might be slow)...")
     try:
         model = AutoModelForCausalLM.from_pretrained(
             MODEL_PATH,
-            device_map="auto",
-            torch_dtype=torch.float16,
+            device_map="cpu", # 強制 CPU
+            # torch_dtype=torch.float16, # CPU 上通常不支援 float16 推論，註解掉以防萬一
             trust_remote_code=True
         )
     except Exception as e:
-        print(f"Error loading model with GPU config: {e}")
-        print("Falling back to CPU/Default config...")
+        print(f"Error loading model: {e}")
+        # Final fallback attempt
         model = AutoModelForCausalLM.from_pretrained(MODEL_PATH, trust_remote_code=True)
 
     def predict(message, history):
