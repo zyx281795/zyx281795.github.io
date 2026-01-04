@@ -632,21 +632,15 @@ async function loadYiBianData() {
         // 初始化搜索
         initYiBianSearch();
 
-            // 初始化彈窗
+                    // 初始化彈窗
 
-            initYiBianModal();
+                    initYiBianModal();
 
-        
+            
 
-            // 初始化國考題庫
+                    // 渲染資料
 
-            initExam();
-
-        
-
-            // 渲染資料
-
-            renderYiBian();
+                    renderYiBian();
 
         
         updateYiBianStats();
