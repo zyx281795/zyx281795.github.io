@@ -1,7 +1,4 @@
-torch
-transformers
+transformers>=4.37.0
 accelerate
-gradio
-sentencepiece
-protobuf
+gradio>=4.0.0
 scipy
