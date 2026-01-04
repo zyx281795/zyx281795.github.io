@@ -652,14 +652,20 @@ body {
     backdrop-filter: blur(2px);
 }
 
-/* PDF 卡片樣式 */
+/* PDF 卡片樣式 - 桌面版預設 */
 .pdf-card {
-    height: 800px;
+    height: 800px !important;
     position: relative;
 }
 
 .pdf-card embed {
     display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.pdf-fallback {
+    display: none;
 }
 
 /* 平板設備 */
