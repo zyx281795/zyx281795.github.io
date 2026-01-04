@@ -1361,12 +1361,13 @@ function updateDashboardExamStats() {
 
 // ========== 聊天機器人功能 (BianCang-Qwen2-7B) ==========
 const SYSTEM_CONFIG = {
-    // 您的 Hugging Face Space ID
-    hfSpaceId: "Atypical281795/CSMU_TCM_Service", 
-    // 備用模型 (Open Source 120B)
+    // 您的 Hugging Face Space ID (測試用: 公開的 GPT-OSS 空間)
+    hfSpaceId: "amd/gpt-oss-120b-chatbot", 
+    // 備用模型
     fallbackSpaceId: "amd/gpt-oss-120b-chatbot",
-    useCustomModel: true, 
-    timeout: 20000 // 逾時設定 (毫秒)
+    useCustomModel: false, // 改回 False: 優先使用 Gemini API
+    timeout: 20000, // 逾時設定 (毫秒)
+    apiKey: 'AIzaSyDsI1HPKterSkt-E5mNiIF7xvs3TK0HAiw' // Gemini Key
 };
 
 function initChatbot() {
@@ -1400,28 +1401,32 @@ async function handleChatSubmit() {
     try {
         let botResponse;
         
-        // 檢查 Gradio Client 是否載入
-        if (!window.GradioClient) {
-            throw new Error("Gradio Client library not loaded.");
-        }
-
-        // 嘗試呼叫主模型，設定逾時
-        try {
-            console.log(`[Chatbot] Attempting primary model: ${SYSTEM_CONFIG.hfSpaceId}`);
-            const primaryPromise = callCustomModelAPI(userText, SYSTEM_CONFIG.hfSpaceId);
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error("Timeout")), SYSTEM_CONFIG.timeout)
-            );
+        if (SYSTEM_CONFIG.useCustomModel) {
+            // --- 使用 Hugging Face 自定義模型 ---
             
-            botResponse = await Promise.race([primaryPromise, timeoutPromise]);
-            console.log("[Chatbot] Primary model success");
-        } catch (error) {
-            console.warn('[Chatbot] Primary model failed or timed out:', error);
-            // 主模型失敗或逾時，切換到備用模型
-            updateStatus('主模型回應過慢，正在切換至備用模型 (GPT-OSS-120B)...', 'info');
-            console.log(`[Chatbot] Attempting fallback model: ${SYSTEM_CONFIG.fallbackSpaceId}`);
-            botResponse = await callCustomModelAPI(userText, SYSTEM_CONFIG.fallbackSpaceId);
-            console.log("[Chatbot] Fallback model success");
+            // 檢查 Gradio Client 是否載入
+            if (!window.GradioClient) {
+                throw new Error("Gradio Client library not loaded.");
+            }
+
+            try {
+                console.log(`[Chatbot] Attempting primary model: ${SYSTEM_CONFIG.hfSpaceId}`);
+                const primaryPromise = callCustomModelAPI(userText, SYSTEM_CONFIG.hfSpaceId);
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error("Timeout")), SYSTEM_CONFIG.timeout)
+                );
+                
+                botResponse = await Promise.race([primaryPromise, timeoutPromise]);
+                console.log("[Chatbot] Primary model success");
+            } catch (error) {
+                console.warn('[Chatbot] Primary model failed or timed out:', error);
+                updateStatus('主模型連線異常，切換至備用模型...', 'info');
+                botResponse = await callCustomModelAPI(userText, SYSTEM_CONFIG.fallbackSpaceId);
+            }
+        } else {
+            // --- 使用 Gemini API (預設) ---
+            console.log("[Chatbot] Using Gemini API");
+            botResponse = await callGeminiAPI(SYSTEM_CONFIG.apiKey, userText);
         }
 
         // Remove loading and add response
@@ -1432,7 +1437,6 @@ async function handleChatSubmit() {
         console.error('[Chatbot] All models failed:', error);
         
         // Fallback to Mock Response (本地離線回復)
-        // 確保用戶總是能得到回應，不會卡住
         await new Promise(r => setTimeout(r, 500));
         const mockResponse = generateMockResponse(userText);
         
@@ -1465,38 +1469,24 @@ async function callCustomModelAPI(prompt, spaceId) {
             }
         }
 
-        // 嘗試不同的 API 路徑與參數組合
         let result;
-        
-        // 1. 嘗試標準 ChatInterface (/chat)
         try {
-             console.log(`[Gradio] Trying /chat endpoint...`);
+             // 嘗試標準 ChatInterface (/chat)
              result = await client.predict("/chat", { 
                 message: prompt, 
                 history: history 
             });
         } catch (e1) {
             console.warn(`[Gradio] /chat failed, trying /predict...`, e1);
-            
-            // 2. 嘗試通用預測接口 (/predict)
             try {
+                // 嘗試通用預測接口 (/predict)
                 result = await client.predict("/predict", { 
                     message: prompt, 
                     history: history 
                 });
             } catch (e2) {
-                console.warn(`[Gradio] /predict with history failed, trying simple message...`, e2);
-                
-                // 3. 嘗試最簡單的參數 (只傳 message，忽略 history，有些模型不支援 history 參數)
-                // 這對於某些自定義 Gradio App 很有用
-                // 注意：這裡假設輸入參數名仍為 text 或 message
-                try {
-                    result = await client.predict("/predict", [prompt]); 
-                } catch (e3) {
-                     // 最後嘗試無參數路徑 (有些 Space 只有一個 fn)
-                     // 但通常需要參數名
-                     throw new Error(`All API attempts failed for ${spaceId}`);
-                }
+                // 嘗試最簡單參數
+                result = await client.predict("/predict", [prompt]); 
             }
         }
 
@@ -1505,4 +1495,44 @@ async function callCustomModelAPI(prompt, spaceId) {
         console.error(`Hugging Face API Error (${spaceId}):`, error);
         throw error;
     }
+}
+
+async function callGeminiAPI(apiKey, prompt) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    
+    const systemInstruction = `你是一個專業的中醫藥材知識助手。你具備深厚的中醫理論基礎，特別擅長中藥材的性味、歸經、功效與主治。
+    你的回答應參考歷年（民國94-114年）中醫師國家考試的知識點，提供精確、嚴謹且符合臨床實務的解答。
+    請直接回答問題，不要提及你是 AI 或由 Google 開發。`;
+    
+    const payload = {
+        contents: [{
+            parts: [{
+                text: `${systemInstruction}\n\n用戶提問：${prompt}`
+            }]
+        }]
+    };
+
+    let response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (response.status === 429) {
+        console.log('Primary model quota exceeded, trying fallback...');
+        const urlFallback = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-preview-02-05:generateContent?key=${apiKey}`;
+        response = await fetch(urlFallback, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    }
+
+    if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error?.message || 'API 請求失敗');
+    }
+
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
 }
