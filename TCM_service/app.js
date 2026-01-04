@@ -1361,11 +1361,10 @@ function updateDashboardExamStats() {
 
 // ========== 聊天機器人功能 (BianCang-Qwen2-7B) ==========
 const SYSTEM_CONFIG = {
-    // 您的 Hugging Face Space ID (例如: "username/space-name")
-    // 請參閱 README_MODEL_DEPLOY.md 了解如何獲取
-    hfSpaceId: "Atypical281795/CSMU_TCM_Project", // 已更新為您的 Space ID
-    useCustomModel: true, // 切換開關：true = 使用自定義模型, false = 使用 Gemini (備用)
-    apiKey: 'AIzaSyDsI1HPKterSkt-E5mNiIF7xvs3TK0HAiw' // Gemini Key (備用)
+    // 您的 Hugging Face Space ID
+    hfSpaceId: "Atypical281795/CSMU_TCM_Service", 
+    useCustomModel: true, 
+    apiKey: 'AIzaSyDsI1HPKterSkt-E5mNiIF7xvs3TK0HAiw' 
 };
 
 function initChatbot() {
@@ -1460,25 +1459,33 @@ function removeMessage(id) {
 
 async function callCustomModelAPI(prompt) {
     if (!window.GradioClient) {
-        throw new Error("Gradio Client library not loaded. Check index.html imports.");
+        throw new Error("Gradio Client library not loaded.");
     }
 
     try {
-        // 連接到 Hugging Face Space
         const client = await window.GradioClient.connect(SYSTEM_CONFIG.hfSpaceId);
         
-        // 呼叫預測 API
-        // 注意：這裡假設您的 Gradio App 輸入是 "message"
-        const result = await client.predict("/chat", { 
-            message: prompt 
+        // 取得目前的對話紀錄 (供模型參考 context)
+        const history = [];
+        const messageEls = document.querySelectorAll('#chat-messages .message:not(.loading)');
+        // 這裡簡單抓取最後幾則訊息作為 context
+        for (let i = 0; i < messageEls.length; i += 2) {
+            if (messageEls[i] && messageEls[i+1]) {
+                history.push([messageEls[i].innerText, messageEls[i+1].innerText]);
+            }
+        }
+
+        // Gradio ChatInterface 的 API 通常路徑是 "/predict"
+        // 參數順序通常是 (message, history)
+        const result = await client.predict("/predict", { 
+            message: prompt,
+            history: history
         });
 
-        // 根據 Gradio 回傳格式解析
-        // 通常是 result.data[0]
         return result.data[0];
     } catch (error) {
         console.error("Hugging Face API Error:", error);
-        throw new Error("無法連接到自定義模型伺服器，請檢查 Space 狀態。");
+        throw new Error("無法連接到自定義模型伺服器。請確認 Space 已啟動 (Running)。");
     }
 }
 
