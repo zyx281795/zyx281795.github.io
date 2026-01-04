@@ -18,21 +18,25 @@ try:
     # 載入 Tokenizer
     tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, trust_remote_code=True)
 
-    # 載入模型
-    # 強制使用 CPU 模式以避免在免費用戶端出現 CUDA Out of Memory
-    # 如果您有 GPU (T4/A10G)，可將 device_map 改為 "auto" 並取消註解 torch_dtype
-    print("Loading model on CPU (this might be slow)...")
+    # 載入模型 (使用 GPU)
+    # 使用者已確認有 Nvidia T4 GPU，故啟用 GPU 加速
+    print("Loading model with GPU support...")
     try:
         model = AutoModelForCausalLM.from_pretrained(
             MODEL_PATH,
-            device_map="cpu", # 強制 CPU
-            # torch_dtype=torch.float16, # CPU 上通常不支援 float16 推論，註解掉以防萬一
+            device_map="auto",
+            torch_dtype=torch.float16,
             trust_remote_code=True
         )
     except Exception as e:
-        print(f"Error loading model: {e}")
-        # Final fallback attempt
-        model = AutoModelForCausalLM.from_pretrained(MODEL_PATH, trust_remote_code=True)
+        print(f"Error loading model with GPU config: {e}")
+        print("Falling back to CPU/Default config...")
+        # 如果 GPU 載入失敗 (例如 VRAM 不足)，嘗試用 CPU
+        model = AutoModelForCausalLM.from_pretrained(
+            MODEL_PATH,
+            device_map="cpu",
+            trust_remote_code=True
+        )
 
     def predict(message, history):
         # 構建 Prompt (根據 Qwen 的格式)
