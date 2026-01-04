@@ -358,7 +358,32 @@
                                         <h4>訓練結果說明</h4>
                                         <p>BianCang-Qwen2-7B 經 民國94年至114年間中醫師國家考試中藥材相關之1,751題純文字選擇題 為資料集，採 LoRA 微調後的權重結果。</p>
                                         <h4 style="margin-top: 24px;">研究摘要</h4>
-                                        <p style="text-align: justify;">本研究旨在建構一套以大型語言模型為核心之中醫藥材知識系統，評估Supervised Fine Tuning技術對於專業中醫語境下之實務可行性。研究以Biancang-Qwen2.5-7B-Instruct為基礎模型，採取「模型內化知識」策略，避免對外部檢索機制的高度依賴，並以LoRA進行監督式微調。評測資料來源為民國94年至114年間中醫師國家考試中藥材相關之1,751題純文字選擇題，以作答正確率（MCQ accuracy）作為主要評估指標，並納入 Lingdan-13B-Base作為對照模型。實驗流程涵蓋資料集預處理、多版本模型推論結果比較分析，並透過 McNemar’s test 檢驗微調前後作答表現之顯著差異。結果顯示，模型在未引入外部檢索機制下，作答正確率由 58.08% 提升至72.76%，顯示模型於中醫藥材知識理解與作答穩定性上皆獲得明顯改善，證實本研究所提出之模型內化式微調策略於中醫國考任務中展現良好成效。最終，本研究完成一套整合微調模型之中醫藥材知識系統，提供國考題目練習與中醫知識查詢功能，驗證其於實際應用情境中的可行性與穩定性。</p>
+                                        <p style="text-align: justify;">本研究旨在建構一套以大型語言模型為核心之中醫藥材知識系統，評估Supervised Fine Tuning技術對於專業中醫語境下之實務可行性。研究以Biancang-Qwen2.5-7B-Instruct為基礎模型，採取「模型內化知識」策略，避免對外部檢索機制的高度依賴，並以LoRA進行監督式微調。評測資料來源為民國94年至114年間中醫師國家考試中藥材相關之1,751題純文字選擇題，以作答正確率（MCQ accuracy）作為主要評估指標，並納入 Lingdan-13B-Base作為對照模型。實驗流程涵蓋資料集預處理、多版本模型推論結果比較分析，並透過 McNemar's test 檢驗微調前後作答表現之顯著差異。結果顯示，模型在未引入外部檢索機制下，作答正確率由 58.08% 提升至72.76%，顯示模型於中醫藥材知識理解與作答穩定性上皆獲得明顯改善，證實本研究所提出之模型內化式微調策略於中醫國考任務中展現良好成效。最終，本研究完成一套整合微調模型之中醫藥材知識系統，提供國考題目練習與中醫知識查詢功能，驗證其於實際應用情境中的可行性與穩定性。</p>
+
+                                        <div style="margin-top: 24px; padding: 16px; background: linear-gradient(135deg, #f6f8fa 0%, #e9ecef 100%); border-left: 4px solid #047857; border-radius: 8px;">
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <span style="font-size: 32px;">🤗</span>
+                                                <div style="flex: 1;">
+                                                    <h4 style="margin: 0 0 8px 0; color: #1c1917; font-size: 16px;">模型權重開放下載</h4>
+                                                    <p style="margin: 0 0 12px 0; color: #57534e; font-size: 14px; line-height: 1.5;">
+                                                        本研究之 BianCang-Qwen2-7B LoRA 微調權重現已開放部署於 Hugging Face 平台，歡迎訪問體驗互動式推論服務。
+                                                    </p>
+                                                    <a href="https://huggingface.co/spaces/Atypical281795/CSMU_TCM_Service"
+                                                       target="_blank"
+                                                       rel="noopener noreferrer"
+                                                       style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #047857 0%, #059669 100%); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+                                                       onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';"
+                                                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">
+                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                            <polyline points="7 10 12 15 17 10"></polyline>
+                                                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                                                        </svg>
+                                                        訪問 Hugging Face Space
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
