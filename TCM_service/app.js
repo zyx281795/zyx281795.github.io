@@ -10,7 +10,8 @@ const AppState = {
     pageSize: 30,
     searchQuery: '',
     selectedHerb: null,
-    currentImageIndex: 0
+    currentImageIndex: 0,
+    hfClient: null
 };
 
 // ========== 頁面標題映射 ==========
@@ -1307,9 +1308,6 @@ function updateDashboardExamStats() {
 }
 
 // ========== 聊天機器人功能 (BianCang-Qwen2-7B) ==========
-const SYSTEM_CONFIG = {
-    apiKey: 'AIzaSyDsI1HPKterSkt-E5mNiIF7xvs3TK0HAiw'
-};
 
 function initChatbot() {
     const sendBtn = document.getElementById('send-btn');
@@ -1319,24 +1317,54 @@ function initChatbot() {
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleChatSubmit();
     });
+
+    // Initialize HF Client
+    initHuggingFaceClient();
+}
+
+async function initHuggingFaceClient() {
+    try {
+        updateStatus('正在連接 AI 模型 (AMD GPT-OSS-120B)...', 'info');
+        // Dynamic import for Gradio Client
+        const { Client } = await import('https://cdn.jsdelivr.net/npm/@gradio/client/+esm');
+        AppState.hfClient = await Client.connect("amd/gpt-oss-120b-chatbot");
+        console.log("Connected to HF Space: amd/gpt-oss-120b-chatbot");
+        updateStatus('✅ AI 模型連線成功', 'success');
+    } catch (e) {
+        console.error("Failed to connect to HF Space:", e);
+        updateStatus('❌ AI 模型連線失敗，將使用離線模式', 'error');
+    }
 }
 
 async function handleChatSubmit() {
     const inputEl = document.getElementById('chat-input');
-    const userText = inputEl.value.trim();
+    const sendBtn = document.getElementById('send-btn');
+    const userText = inputEl ? inputEl.value.trim() : "";
 
     if (!userText) return;
 
     // 1. Add User Message
     addMessage(userText, 'user');
-    inputEl.value = '';
+    if (inputEl) inputEl.value = '';
 
     // 2. Loading State
     const loadingId = addMessage('正在思考中...', 'bot', true);
 
     try {
-        // Real API Call using hardcoded key
-        const botResponse = await callGeminiAPI(SYSTEM_CONFIG.apiKey, userText);
+        let botResponse;
+        
+        if (AppState.hfClient) {
+            botResponse = await callHuggingFaceAPI(userText);
+        } else {
+            // Fallback if client isn't ready
+            console.warn('HF Client not ready, trying to reconnect...');
+            await initHuggingFaceClient();
+            if (AppState.hfClient) {
+                botResponse = await callHuggingFaceAPI(userText);
+            } else {
+                throw new Error("AI Client Unavailable");
+            }
+        }
 
         // Remove loading and add response
         removeMessage(loadingId);
@@ -1345,12 +1373,32 @@ async function handleChatSubmit() {
     } catch (error) {
         console.warn('API Error, switching to mock response:', error);
         
-        // Fallback to Mock Response (Keyword based) ensuring the demo continues smoothly
-        await new Promise(r => setTimeout(r, 1500)); // Simulate inference time
+        // Fallback to Mock Response
+        await new Promise(r => setTimeout(r, 1500)); 
         const mockResponse = generateMockResponse(userText);
         
         removeMessage(loadingId);
-        addMessage(mockResponse, 'bot');
+        addMessage(mockResponse + "\n(註：目前無法連接至線上模型，以上為離線資料庫結果)", 'bot');
+    }
+}
+
+async function callHuggingFaceAPI(prompt) {
+    // Calling the Gradio API
+    // We try the standard /chat endpoint first
+    try {
+        const result = await AppState.hfClient.predict("/chat", { 
+            message: prompt, 
+            system_prompt: "你是一個專業的中醫藥材知識助手。你具備深厚的中醫理論基礎，特別擅長中藥材的性味、歸經、功效與主治。你的回答應參考歷年（民國94-114年）中醫師國家考試的知識點，提供精確、嚴謹且符合臨床實務的解答。", 
+            temperature: 0.7,
+            max_new_tokens: 2048
+        });
+        
+        return result.data[0];
+    } catch (e) {
+        console.error("HF /chat failed, trying /predict or raw call:", e);
+        // Fallback or specific handling if the endpoint name is different
+        // For many spaces, it might be just positional arguments
+        throw e;
     }
 }
 
@@ -1392,47 +1440,4 @@ function removeMessage(id) {
     if (!id) return;
     const el = document.getElementById(id);
     if (el) el.remove();
-}
-
-async function callGeminiAPI(apiKey, prompt) {
-    // Updated model to gemini-2.0-flash (Confirmed available via listModels)
-    let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-    
-    // System prompt for a TCM expert assistant
-    const systemInstruction = `你是一個專業的中醫藥材知識助手。你具備深厚的中醫理論基礎，特別擅長中藥材的性味、歸經、功效與主治。
-    你的回答應參考歷年（民國94-114年）中醫師國家考試的知識點，提供精確、嚴謹且符合臨床實務的解答。
-    請直接回答問題，不要提及你是 AI 或由 Google 開發。`;
-    
-    const payload = {
-        contents: [{
-            parts: [{
-                text: `${systemInstruction}\n\n用戶提問：${prompt}`
-            }]
-        }]
-    };
-
-    let response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
-
-    // If quota exceeded (429), try fallback model
-    if (response.status === 429) {
-        console.log('Primary model quota exceeded, trying fallback...');
-        url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-preview-02-05:generateContent?key=${apiKey}`;
-        response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-    }
-
-    if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error?.message || 'API 請求失敗');
-    }
-
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
 }
