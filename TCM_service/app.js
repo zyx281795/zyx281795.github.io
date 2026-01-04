@@ -1361,7 +1361,11 @@ function updateDashboardExamStats() {
 
 // ========== 聊天機器人功能 (BianCang-Qwen2-7B) ==========
 const SYSTEM_CONFIG = {
-    apiKey: 'AIzaSyDsI1HPKterSkt-E5mNiIF7xvs3TK0HAiw'
+    // 您的 Hugging Face Space ID (例如: "username/space-name")
+    // 請參閱 README_MODEL_DEPLOY.md 了解如何獲取
+    hfSpaceId: "Qwen/Qwen2.5-7B-Instruct", // 預設先用官方 Demo 測試，請更換為您的 Space ID
+    useCustomModel: true, // 切換開關：true = 使用自定義模型, false = 使用 Gemini (備用)
+    apiKey: 'AIzaSyDsI1HPKterSkt-E5mNiIF7xvs3TK0HAiw' // Gemini Key (備用)
 };
 
 function initChatbot() {
@@ -1388,8 +1392,15 @@ async function handleChatSubmit() {
     const loadingId = addMessage('正在思考中...', 'bot', true);
 
     try {
-        // Real API Call using hardcoded key
-        const botResponse = await callGeminiAPI(SYSTEM_CONFIG.apiKey, userText);
+        let botResponse;
+        
+        if (SYSTEM_CONFIG.useCustomModel) {
+            // 使用自定義模型 (Hugging Face)
+            botResponse = await callCustomModelAPI(userText);
+        } else {
+            // 使用 Gemini API (備用)
+            botResponse = await callGeminiAPI(SYSTEM_CONFIG.apiKey, userText);
+        }
 
         // Remove loading and add response
         removeMessage(loadingId);
@@ -1445,6 +1456,30 @@ function removeMessage(id) {
     if (!id) return;
     const el = document.getElementById(id);
     if (el) el.remove();
+}
+
+async function callCustomModelAPI(prompt) {
+    if (!window.GradioClient) {
+        throw new Error("Gradio Client library not loaded. Check index.html imports.");
+    }
+
+    try {
+        // 連接到 Hugging Face Space
+        const client = await window.GradioClient.connect(SYSTEM_CONFIG.hfSpaceId);
+        
+        // 呼叫預測 API
+        // 注意：這裡假設您的 Gradio App 輸入是 "message"
+        const result = await client.predict("/chat", { 
+            message: prompt 
+        });
+
+        // 根據 Gradio 回傳格式解析
+        // 通常是 result.data[0]
+        return result.data[0];
+    } catch (error) {
+        console.error("Hugging Face API Error:", error);
+        throw new Error("無法連接到自定義模型伺服器，請檢查 Space 狀態。");
+    }
 }
 
 async function callGeminiAPI(apiKey, prompt) {

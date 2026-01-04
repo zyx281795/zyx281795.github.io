@@ -506,6 +506,12 @@
         </div>
     </div>
 
+    <!-- Gradio Client for Custom Model -->
+    <script type="module">
+        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
+        window.GradioClient = Client;
+    </script>
+
     <!-- 數據腳本 (支援直接開啟 index.html) -->
     <script src="data.js"></script>
     <script src="app.js"></script>
