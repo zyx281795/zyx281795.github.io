@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('中醫藥材知識系統啟動中...');
 
     // 初始化狀態列
-    // initStatusBar();
+    initStatusBar();
 
     // 初始化導航
     initNavigation();
@@ -43,9 +43,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 初始化聊天機器人
     initChatbot();
-
-    // 初始化手機側邊欄
-    initMobileSidebar();
 
     // 載入藥材資料
     await loadHerbsData();
@@ -89,8 +86,6 @@ function initStatusBar() {
 }
 
 function updateStatus(message, type = 'info') {
-    // Status bar disabled by user request
-    /*
     const statusMsg = document.getElementById('status-message');
     if (statusMsg) {
         statusMsg.textContent = message;
@@ -102,7 +97,6 @@ function updateStatus(message, type = 'info') {
             statusMsg.style.color = '#d6d3d1';
         }
     }
-    */
     console.log(`[System Status] ${message}`);
 }
 
@@ -510,48 +504,6 @@ function setupImageNavigation(herb) {
     });
 }
 
-// ========== 手機側邊欄功能 ==========
-function initMobileSidebar() {
-    const toggleBtn = document.getElementById('sidebar-toggle');
-    const overlay = document.getElementById('sidebar-overlay');
-    const navItems = document.querySelectorAll('.nav-item');
-    const appContainer = document.querySelector('.app-container');
-
-    if (!toggleBtn) return;
-
-    // Toggle sidebar
-    toggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.body.classList.toggle('sidebar-open');
-    });
-
-    // Close on overlay click
-    if (overlay) {
-        overlay.addEventListener('click', () => {
-            document.body.classList.remove('sidebar-open');
-        });
-    }
-
-    // Close on nav item click (mobile only)
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            if (window.innerWidth <= 768) {
-                document.body.classList.remove('sidebar-open');
-            }
-        });
-    });
-
-    // Close when clicking outside (general safety)
-    document.addEventListener('click', (e) => {
-        if (window.innerWidth <= 768 && 
-            document.body.classList.contains('sidebar-open') && 
-            !e.target.closest('.sidebar') && 
-            e.target !== toggleBtn) {
-            document.body.classList.remove('sidebar-open');
-        }
-    });
-}
-
 // ========== 錯誤處理 ==========
 function showError(message) {
     const herbsGrid = document.getElementById('herbs-grid');
@@ -632,15 +584,21 @@ async function loadYiBianData() {
         // 初始化搜索
         initYiBianSearch();
 
-                    // 初始化彈窗
+            // 初始化彈窗
 
-                    initYiBianModal();
+            initYiBianModal();
 
-            
+        
 
-                    // 渲染資料
+            // 初始化國考題庫
 
-                    renderYiBian();
+            initExam();
+
+        
+
+            // 渲染資料
+
+            renderYiBian();
 
         
         updateYiBianStats();
@@ -679,12 +637,8 @@ function initYiBianCategories() {
         const formulaCats = new Set();
         if (YiBianState.allData.formulas) {
             YiBianState.allData.formulas.forEach(f => {
-                if (f.categories) {
-                    if (Array.isArray(f.categories)) {
-                        f.categories.forEach(c => formulaCats.add(c));
-                    } else if (typeof f.categories === 'string') {
-                        f.categories.split(',').forEach(c => formulaCats.add(c.trim()));
-                    }
+                if (f.categories && Array.isArray(f.categories)) {
+                    f.categories.forEach(c => formulaCats.add(c));
                 } else if (f.category) {
                     formulaCats.add(f.category);
                 }
@@ -965,14 +919,7 @@ function openYiBianModal(item) {
         tag.textContent = item.category;
         categoryContainer.appendChild(tag);
     } else if (!isHerb && item.categories) {
-        let cats = [];
-        if (Array.isArray(item.categories)) {
-            cats = item.categories;
-        } else if (typeof item.categories === 'string') {
-            cats = item.categories.split(',').map(c => c.trim());
-        }
-        
-        cats.forEach(cat => {
+        item.categories.forEach(cat => {
             const tag = document.createElement('span');
             tag.className = 'yibian-category-tag';
             tag.textContent = cat;
@@ -1449,7 +1396,7 @@ function removeMessage(id) {
 
 async function callGeminiAPI(apiKey, prompt) {
     // Updated model to gemini-2.0-flash (Confirmed available via listModels)
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
     
     // System prompt for a TCM expert assistant
     const systemInstruction = `你是一個專業的中醫藥材知識助手。你具備深厚的中醫理論基礎，特別擅長中藥材的性味、歸經、功效與主治。
@@ -1473,8 +1420,8 @@ async function callGeminiAPI(apiKey, prompt) {
     // If quota exceeded (429), try fallback model
     if (response.status === 429) {
         console.log('Primary model quota exceeded, trying fallback...');
-        const urlFallback = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-preview-02-05:generateContent?key=${apiKey}`;
-        response = await fetch(urlFallback, {
+        url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-preview-02-05:generateContent?key=${apiKey}`;
+        response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
