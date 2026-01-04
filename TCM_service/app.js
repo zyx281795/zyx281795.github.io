@@ -26,9 +26,6 @@ const PAGE_TITLES = {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('中醫藥材知識系統啟動中...');
 
-    // 初始化狀態列
-    initStatusBar();
-
     // 初始化導航
     initNavigation();
 
@@ -50,53 +47,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('系統初始化完成！');
 });
 
-// ========== 狀態列功能 ==========
-function initStatusBar() {
-    const statusBar = document.createElement('div');
-    statusBar.id = 'app-status-bar';
-    statusBar.style.cssText = `
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background-color: #292524;
-        color: #d6d3d1;
-        padding: 8px 16px;
-        font-size: 12px;
-        z-index: 9999;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-top: 1px solid #44403c;
-    `;
-    statusBar.innerHTML = `
-        <div id="status-message">系統準備就緒</div>
-        <div id="status-details"></div>
-    `;
-    document.body.appendChild(statusBar);
-
-    // 全局錯誤捕捉
-    window.addEventListener('error', (event) => {
-        updateStatus(`❌ 系統錯誤: ${event.message}`, 'error');
-    });
-
-    window.addEventListener('unhandledrejection', (event) => {
-        updateStatus(`❌ 未捕捉的 Promise 錯誤: ${event.reason}`, 'error');
-    });
-}
-
+// ========== 狀態列功能 (已移除顯示，保留 Console Log) ==========
 function updateStatus(message, type = 'info') {
-    const statusMsg = document.getElementById('status-message');
-    if (statusMsg) {
-        statusMsg.textContent = message;
-        if (type === 'error') {
-            statusMsg.style.color = '#f87171';
-        } else if (type === 'success') {
-            statusMsg.style.color = '#4ade80';
-        } else {
-            statusMsg.style.color = '#d6d3d1';
-        }
-    }
     console.log(`[System Status] ${message}`);
 }
 
@@ -1395,8 +1347,8 @@ function removeMessage(id) {
 }
 
 async function callGeminiAPI(apiKey, prompt) {
-    // Updated model to gemini-2.0-flash (Confirmed available via listModels)
-    let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    // Use gemini-1.5-flash for stability
+    let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
     // System prompt for a TCM expert assistant
     const systemInstruction = `你是一個專業的中醫藥材知識助手。你具備深厚的中醫理論基礎，特別擅長中藥材的性味、歸經、功效與主治。
@@ -1416,17 +1368,6 @@ async function callGeminiAPI(apiKey, prompt) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     });
-
-    // If quota exceeded (429), try fallback model
-    if (response.status === 429) {
-        console.log('Primary model quota exceeded, trying fallback...');
-        const urlFallback = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-preview-02-05:generateContent?key=${apiKey}`;
-        response = await fetch(urlFallback, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-    }
 
     if (!response.ok) {
         const errData = await response.json();
