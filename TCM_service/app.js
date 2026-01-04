@@ -1363,8 +1363,10 @@ function updateDashboardExamStats() {
 const SYSTEM_CONFIG = {
     // 您的 Hugging Face Space ID
     hfSpaceId: "Atypical281795/CSMU_TCM_Service", 
+    // 備用模型 (Open Source 120B)
+    fallbackSpaceId: "amd/gpt-oss-120b-chatbot",
     useCustomModel: true, 
-    apiKey: 'AIzaSyDsI1HPKterSkt-E5mNiIF7xvs3TK0HAiw' 
+    timeout: 20000 // 逾時設定 (毫秒)
 };
 
 function initChatbot() {
@@ -1393,12 +1395,19 @@ async function handleChatSubmit() {
     try {
         let botResponse;
         
-        if (SYSTEM_CONFIG.useCustomModel) {
-            // 使用自定義模型 (Hugging Face)
-            botResponse = await callCustomModelAPI(userText);
-        } else {
-            // 使用 Gemini API (備用)
-            botResponse = await callGeminiAPI(SYSTEM_CONFIG.apiKey, userText);
+        // 嘗試呼叫主模型，設定逾時
+        try {
+            const primaryPromise = callCustomModelAPI(userText, SYSTEM_CONFIG.hfSpaceId);
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error("Timeout")), SYSTEM_CONFIG.timeout)
+            );
+            
+            botResponse = await Promise.race([primaryPromise, timeoutPromise]);
+        } catch (error) {
+            console.warn('Primary model failed or timed out:', error);
+            // 主模型失敗或逾時，切換到備用模型
+            updateStatus('主模型回應過慢，正在切換至備用模型 (GPT-OSS-120B)...', 'info');
+            botResponse = await callCustomModelAPI(userText, SYSTEM_CONFIG.fallbackSpaceId);
         }
 
         // Remove loading and add response
@@ -1406,64 +1415,25 @@ async function handleChatSubmit() {
         addMessage(botResponse, 'bot');
 
     } catch (error) {
-        console.warn('API Error, switching to mock response:', error);
+        console.error('All models failed:', error);
         
         // Fallback to Mock Response (Keyword based) ensuring the demo continues smoothly
-        await new Promise(r => setTimeout(r, 1500)); // Simulate inference time
+        await new Promise(r => setTimeout(r, 1000)); // Simulate inference time
         const mockResponse = generateMockResponse(userText);
         
         removeMessage(loadingId);
         addMessage(mockResponse, 'bot');
+        updateStatus('無法連接到雲端模型，已切換至離線模式。', 'error');
     }
 }
 
-function generateMockResponse(input) {
-    const text = input.toLowerCase();
-    
-    if (text.includes('當歸')) {
-        return "【BianCang-Qwen2-7B 推論結果】\n\n當歸\n性味：甘、辛，溫。\n歸經：歸肝、心、脾經。\n功效：補血活血，調經止痛，潤腸通便。\n\n主治：用於血虛萎黃、眩暈心悸、月經不調、經閉痛經、虛寒腹痛、腸燥便秘、風濕痹痛、跌撲損傷、癰疽瘡瘍。酒當歸活血通經；土炒當歸不滑腸。";
-    }
-    if (text.includes('黃耆') || text.includes('黃芪')) {
-        return "【BianCang-Qwen2-7B 推論結果】\n\n黃耆\n性味：甘，微溫。\n歸經：歸脾、肺經。\n功效：補氣昇陽，固表止汗，利水消腫，生津養血，行滯通痹，托毒排膿，斂瘡生肌。\n\n主治：氣虛乏力、食少便溏、中氣下陷、久瀉脫肛、便血崩漏、表虛自汗、氣虛水腫、內熱消渴。";
-    }
-    if (text.includes('人參')) {
-        return "【BianCang-Qwen2-7B 推論結果】\n\n人參\n性味：甘、微苦，微溫。\n歸經：歸脾、肺、心、腎經。\n功效：大補元氣，復脈固脫，補脾益肺，生津養血，安神益智。\n\n主治：體虛欲脫、肢冷脈微、脾虛食少、肺虛喘咳、津傷口渴、內熱消渴、氣血虧虛、久病虛羸、驚悸失眠。";
-    }
-    if (text.includes('四君子湯')) {
-        return "【BianCang-Qwen2-7B 推論結果】\n\n四君子湯\n出處：《太平惠民和劑局方》\n組成：人參、白朮、茯苓、甘草。\n功效：益氣健脾。\n主治：脾胃氣虛證。面色萎白，語聲低微，氣短乏力，食少便溏，舌淡苔白，脈虛弱。";
-    }
-    if (text.includes('歸經')) {
-        return "【BianCang-Qwen2-7B 推論結果】\n\n在中醫理論中，「歸經」是指藥物對於機體某部分的選擇性作用，即某藥對某些臟腑經絡有特殊的親和作用，因而對這些部位的病變起著主要或特殊的治療作用。例如：麻黃歸肺、膀胱經，故能發汗解表、宣肺平喘、利水消腫。";
-    }
-
-    // Default Fallback
-    return "【BianCang-Qwen2-7B 推論結果】\n\n收到您的提問：「" + input + "」\n\n根據中醫藥材知識庫分析，此問題涉及中醫基礎理論與臨床應用。由於目前雲端算力負載較高，系統正以離線模式運行。\n\n建議您詢問具體藥材（如：當歸、黃耆）或方劑名稱，我能為您提供更精確的性味、歸經與功效解析。";
-}
-
-function addMessage(text, sender, isLoading = false) {
-    const container = document.getElementById('chat-messages');
-    const div = document.createElement('div');
-    div.className = `message ${sender}`;
-    div.id = isLoading ? 'chat-loading-' + Date.now() : '';
-    div.innerText = text;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-    return div.id;
-}
-
-function removeMessage(id) {
-    if (!id) return;
-    const el = document.getElementById(id);
-    if (el) el.remove();
-}
-
-async function callCustomModelAPI(prompt) {
+async function callCustomModelAPI(prompt, spaceId) {
     if (!window.GradioClient) {
         throw new Error("Gradio Client library not loaded.");
     }
 
     try {
-        const client = await window.GradioClient.connect(SYSTEM_CONFIG.hfSpaceId);
+        const client = await window.GradioClient.connect(spaceId);
         
         // 取得目前的對話紀錄 (供模型參考 context)
         const history = [];
@@ -1475,59 +1445,28 @@ async function callCustomModelAPI(prompt) {
             }
         }
 
-        // Gradio ChatInterface 的 API 通常路徑是 "/predict"
-        // 參數順序通常是 (message, history)
-        const result = await client.predict("/predict", { 
-            message: prompt,
-            history: history
-        });
+        // 不同的 Space 可能有不同的 API endpoint
+        // 嘗試偵測或預設為 /chat 或 /predict
+        // amd/gpt-oss-120b-chatbot 通常使用 /chat
+        
+        // 為了相容性，我們先嘗試 /chat，失敗再試 /predict
+        let result;
+        try {
+             result = await client.predict("/chat", { 
+                message: prompt,
+                history: history
+            });
+        } catch (e) {
+             // 如果 /chat 失敗，嘗試 /predict (舊版或自定義)
+             result = await client.predict("/predict", { 
+                message: prompt,
+                history: history
+            });
+        }
 
         return result.data[0];
     } catch (error) {
-        console.error("Hugging Face API Error:", error);
-        throw new Error("無法連接到自定義模型伺服器。請確認 Space 已啟動 (Running)。");
+        console.error(`Hugging Face API Error (${spaceId}):`, error);
+        throw error;
     }
-}
-
-async function callGeminiAPI(apiKey, prompt) {
-    // Updated model to gemini-2.0-flash (Confirmed available via listModels)
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-    
-    // System prompt for a TCM expert assistant
-    const systemInstruction = `你是一個專業的中醫藥材知識助手。你具備深厚的中醫理論基礎，特別擅長中藥材的性味、歸經、功效與主治。
-    你的回答應參考歷年（民國94-114年）中醫師國家考試的知識點，提供精確、嚴謹且符合臨床實務的解答。
-    請直接回答問題，不要提及你是 AI 或由 Google 開發。`;
-    
-    const payload = {
-        contents: [{
-            parts: [{
-                text: `${systemInstruction}\n\n用戶提問：${prompt}`
-            }]
-        }]
-    };
-
-    let response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
-
-    // If quota exceeded (429), try fallback model
-    if (response.status === 429) {
-        console.log('Primary model quota exceeded, trying fallback...');
-        url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite-preview-02-05:generateContent?key=${apiKey}`;
-        response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-    }
-
-    if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error?.message || 'API 請求失敗');
-    }
-
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
 }
