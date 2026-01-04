@@ -804,6 +804,7 @@ function createYiBianCard(item) {
     `;
 
     card.addEventListener('click', () => {
+        console.log('點擊醫砭卡片:', item.name, 'Type:', item.type);
         openYiBianModal(item);
     });
 
@@ -859,12 +860,17 @@ function initYiBianModal() {
 
 // 打開醫砭彈窗
 function openYiBianModal(item) {
+    console.log('openYiBianModal 被調用:', item);
     const modal = document.getElementById('yibian-modal');
-    if (!modal) return;
+    if (!modal) {
+        console.error('找不到 yibian-modal 元素');
+        return;
+    }
 
     const isHerb = item.type === 'herb';
     const typeName = isHerb ? '中藥' : '方劑';
     const typeClass = isHerb ? 'herb' : 'formula';
+    console.log('顯示類型:', typeName, 'isHerb:', isHerb);
 
     // 設置標題
     document.getElementById('yibian-modal-type').className = `yibian-type-badge ${typeClass}`;
@@ -895,6 +901,7 @@ function openYiBianModal(item) {
     const formulaDetails = document.getElementById('yibian-formula-details');
 
     if (isHerb) {
+        console.log('顯示中藥詳情');
         herbDetails.style.display = 'block';
         formulaDetails.style.display = 'none';
         setElementContent('yibian-family', item.family);
@@ -906,6 +913,17 @@ function openYiBianModal(item) {
         setElementContent('yibian-contraindications', item.contraindications);
         setElementContent('yibian-pharmacology', item.pharmacology);
     } else {
+        console.log('顯示方劑詳情');
+        console.log('方劑數據:', {
+            source: item.source,
+            composition: item.composition,
+            effects: item.effects,
+            indications: item.indications,
+            rationale: item.rationale,
+            diagnosticCriteria: item.diagnosticCriteria,
+            modifications: item.modifications,
+            modernApplications: item.modernApplications
+        });
         herbDetails.style.display = 'none';
         formulaDetails.style.display = 'block';
         setElementContent('formula-source', item.source);
@@ -918,8 +936,10 @@ function openYiBianModal(item) {
         setElementContent('formula-applications', item.modernApplications);
     }
 
+    console.log('準備顯示彈窗');
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
+    console.log('彈窗已顯示');
 }
 
 // 關閉醫砭彈窗
@@ -935,7 +955,11 @@ function closeYiBianModal() {
 function setElementContent(elementId, content) {
     const element = document.getElementById(elementId);
     if (element) {
-        element.textContent = content || '';
+        const displayContent = content || '暫無資料';
+        element.textContent = displayContent;
+        console.log(`設置元素 ${elementId}:`, displayContent.substring(0, 50));
+    } else {
+        console.warn(`找不到元素: ${elementId}`);
     }
 }
 
@@ -1333,8 +1357,8 @@ function removeMessage(id) {
 }
 
 async function callGeminiAPI(apiKey, prompt) {
-    // Use gemini-1.5-flash-001 for stability and specific versioning
-    let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${apiKey}`;
+    // Use gemini-1.5-flash for latest stable version
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
     // System prompt for a TCM expert assistant
     const systemInstruction = `你是一個專業的中醫藥材知識助手。你具備深厚的中醫理論基礎，特別擅長中藥材的性味、歸經、功效與主治。
