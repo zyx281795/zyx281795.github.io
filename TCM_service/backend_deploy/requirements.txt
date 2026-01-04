@@ -3,3 +3,4 @@ accelerate>=0.26.0
 gradio>=4.0.0
 peft>=0.7.0
 scipy
+bitsandbytes
