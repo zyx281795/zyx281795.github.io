@@ -2,41 +2,55 @@ import os
 import gradio as gr
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import PeftModel
 
-print("=== Application Starting ===")
+print("=== Application Starting (LoRA Mode) ===")
 
 try:
-    # 自動偵測模型路徑
-    # 優先尋找權重資料夾，若找不到則看根目錄
+    # 1. 設定 Base Model (基礎模型)
+    # 這是您微調時使用的原始模型
+    BASE_MODEL_ID = "QLU-NLP/BianCang-Qwen2.5-7B"
+    
+    # 2. 自動偵測 Adapter (微調權重) 路徑
+    # 這是您上傳的資料夾
     if os.path.exists("BianCang-Qwen2.5-7B-Instruct_finetuned_model_1"):
-        MODEL_PATH = "BianCang-Qwen2.5-7B-Instruct_finetuned_model_1"
+        ADAPTER_PATH = "BianCang-Qwen2.5-7B-Instruct_finetuned_model_1"
     else:
-        MODEL_PATH = "." 
+        ADAPTER_PATH = "." 
 
-    print(f"Loading model from: {MODEL_PATH}")
+    print(f"Base Model: {BASE_MODEL_ID}")
+    print(f"Adapter Path: {ADAPTER_PATH}")
 
-    # 載入 Tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, trust_remote_code=True)
+    # 3. 載入 Tokenizer (通常使用 Base Model 的)
+    print("Loading Tokenizer...")
+    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_ID, trust_remote_code=True)
 
-    # 載入模型 (使用 GPU)
-    # 使用者已確認有 Nvidia T4 GPU，故啟用 GPU 加速
-    print("Loading model with GPU support...")
+    # 4. 載入 Base Model
+    print("Loading Base Model...")
     try:
-        model = AutoModelForCausalLM.from_pretrained(
-            MODEL_PATH,
+        base_model = AutoModelForCausalLM.from_pretrained(
+            BASE_MODEL_ID,
             device_map="auto",
             torch_dtype=torch.float16,
             trust_remote_code=True
         )
     except Exception as e:
-        print(f"Error loading model with GPU config: {e}")
-        print("Falling back to CPU/Default config...")
-        # 如果 GPU 載入失敗 (例如 VRAM 不足)，嘗試用 CPU
-        model = AutoModelForCausalLM.from_pretrained(
-            MODEL_PATH,
+        print(f"GPU load failed: {e}. Fallback to CPU.")
+        base_model = AutoModelForCausalLM.from_pretrained(
+            BASE_MODEL_ID,
             device_map="cpu",
             trust_remote_code=True
         )
+
+    # 5. 掛載 LoRA Adapter
+    print("Loading LoRA Adapter...")
+    try:
+        model = PeftModel.from_pretrained(base_model, ADAPTER_PATH)
+        print("LoRA Adapter loaded successfully!")
+    except Exception as e:
+        print(f"Failed to load adapter: {e}")
+        print("Running with Base Model only as fallback.")
+        model = base_model
 
     def predict(message, history):
         # 構建 Prompt (根據 Qwen 的格式)
