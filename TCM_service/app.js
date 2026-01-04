@@ -1382,17 +1382,17 @@ function initChatbot() {
 async function handleChatSubmit() {
     const inputEl = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-btn');
-    const userText = inputEl.value.trim();
+    const userText = inputEl ? inputEl.value.trim() : "";
 
     if (!userText) return;
 
     // Disable input while processing
-    inputEl.disabled = true;
-    sendBtn.disabled = true;
+    if (inputEl) inputEl.disabled = true;
+    if (sendBtn) sendBtn.disabled = true;
 
     // 1. Add User Message
     addMessage(userText, 'user');
-    inputEl.value = '';
+    if (inputEl) inputEl.value = '';
 
     // 2. Loading State
     const loadingId = addMessage('正在思考中...', 'bot', true);
@@ -1441,9 +1441,11 @@ async function handleChatSubmit() {
         updateStatus('無法連接到雲端模型，已切換至離線模式。', 'error');
     } finally {
         // Re-enable input
-        inputEl.disabled = false;
-        sendBtn.disabled = false;
-        inputEl.focus();
+        if (inputEl) {
+            inputEl.disabled = false;
+            inputEl.focus();
+        }
+        if (sendBtn) sendBtn.disabled = false;
     }
 }
 
