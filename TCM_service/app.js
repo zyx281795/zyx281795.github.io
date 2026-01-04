@@ -1357,26 +1357,31 @@ function removeMessage(id) {
 }
 
 async function callGeminiAPI(apiKey, prompt) {
-    // Use v1 API (not v1beta) for gemini-1.5-flash
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Use gemini-2.5-flash (latest stable model)
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
-    // System prompt for a TCM expert assistant
+    // System prompt for a TCM expert assistant - merged into user message for v1 API
     const systemInstruction = `你是一個專業的中醫藥材知識助手。你具備深厚的中醫理論基礎，特別擅長中藥材的性味、歸經、功效與主治。
-    你的回答應參考歷年（民國94-114年）中醫師國家考試的知識點，提供精確、嚴謹且符合臨床實務的解答。
-    請直接回答問題，不要提及你是 AI 或由 Google 開發。`;
+你的回答應參考歷年（民國94-114年）中醫師國家考試的知識點，提供精確、嚴謹且符合臨床實務的解答。
+請用繁體中文回答，不要提及你是 AI 或由 Google 開發。
+
+以下是使用者的問題：`;
 
     const payload = {
-        systemInstruction: {
-            parts: [{ text: systemInstruction }]
-        },
         contents: [{
+            role: 'user',
             parts: [{
-                text: prompt
+                text: systemInstruction + '\n\n' + prompt
             }]
-        }]
+        }],
+        generationConfig: {
+            temperature: 0.7,
+            topP: 0.95,
+            maxOutputTokens: 2048
+        }
     };
 
-    let response = await fetch(url, {
+    const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
