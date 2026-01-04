@@ -1397,17 +1397,21 @@ async function handleChatSubmit() {
         
         // 嘗試呼叫主模型，設定逾時
         try {
+            console.log(`[Chatbot] Attempting primary model: ${SYSTEM_CONFIG.hfSpaceId}`);
             const primaryPromise = callCustomModelAPI(userText, SYSTEM_CONFIG.hfSpaceId);
             const timeoutPromise = new Promise((_, reject) => 
                 setTimeout(() => reject(new Error("Timeout")), SYSTEM_CONFIG.timeout)
             );
             
             botResponse = await Promise.race([primaryPromise, timeoutPromise]);
+            console.log("[Chatbot] Primary model success");
         } catch (error) {
-            console.warn('Primary model failed or timed out:', error);
+            console.warn('[Chatbot] Primary model failed or timed out:', error);
             // 主模型失敗或逾時，切換到備用模型
             updateStatus('主模型回應過慢，正在切換至備用模型 (GPT-OSS-120B)...', 'info');
+            console.log(`[Chatbot] Attempting fallback model: ${SYSTEM_CONFIG.fallbackSpaceId}`);
             botResponse = await callCustomModelAPI(userText, SYSTEM_CONFIG.fallbackSpaceId);
+            console.log("[Chatbot] Fallback model success");
         }
 
         // Remove loading and add response
@@ -1415,10 +1419,10 @@ async function handleChatSubmit() {
         addMessage(botResponse, 'bot');
 
     } catch (error) {
-        console.error('All models failed:', error);
+        console.error('[Chatbot] All models failed:', error);
         
-        // Fallback to Mock Response (Keyword based) ensuring the demo continues smoothly
-        await new Promise(r => setTimeout(r, 1000)); // Simulate inference time
+        // Fallback to Mock Response
+        await new Promise(r => setTimeout(r, 1000));
         const mockResponse = generateMockResponse(userText);
         
         removeMessage(loadingId);
@@ -1428,40 +1432,40 @@ async function handleChatSubmit() {
 }
 
 async function callCustomModelAPI(prompt, spaceId) {
+    console.log(`[Gradio] Connecting to ${spaceId}...`);
     if (!window.GradioClient) {
         throw new Error("Gradio Client library not loaded.");
     }
 
     try {
         const client = await window.GradioClient.connect(spaceId);
+        console.log(`[Gradio] Connected to ${spaceId}`);
         
         // 取得目前的對話紀錄 (供模型參考 context)
         const history = [];
         const messageEls = document.querySelectorAll('#chat-messages .message:not(.loading)');
-        // 這裡簡單抓取最後幾則訊息作為 context
         for (let i = 0; i < messageEls.length; i += 2) {
             if (messageEls[i] && messageEls[i+1]) {
                 history.push([messageEls[i].innerText, messageEls[i+1].innerText]);
             }
         }
 
-        // 不同的 Space 可能有不同的 API endpoint
-        // 嘗試偵測或預設為 /chat 或 /predict
-        // amd/gpt-oss-120b-chatbot 通常使用 /chat
-        
-        // 為了相容性，我們先嘗試 /chat，失敗再試 /predict
+        // 嘗試 API
         let result;
         try {
+             console.log(`[Gradio] Trying /chat endpoint for ${spaceId}...`);
              result = await client.predict("/chat", { 
                 message: prompt,
                 history: history
             });
+            console.log(`[Gradio] /chat endpoint success`);
         } catch (e) {
-             // 如果 /chat 失敗，嘗試 /predict (舊版或自定義)
+             console.warn(`[Gradio] /chat endpoint failed, trying /predict...`, e);
              result = await client.predict("/predict", { 
                 message: prompt,
                 history: history
             });
+            console.log(`[Gradio] /predict endpoint success`);
         }
 
         return result.data[0];
