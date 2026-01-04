@@ -1389,11 +1389,27 @@ async function callHuggingFaceAPI(prompt) {
         const result = await AppState.hfClient.predict("/chat", { 
             message: prompt, 
             system_prompt: "你是一個專業的中醫藥材知識助手。你具備深厚的中醫理論基礎，特別擅長中藥材的性味、歸經、功效與主治。你的回答應參考歷年（民國94-114年）中醫師國家考試的知識點，提供精確、嚴謹且符合臨床實務的解答。", 
-            temperature: 0.7,
-            max_new_tokens: 2048
+            temperature: 0.7
         });
         
-        return result.data[0];
+        // Handle Gradio Chatbot output (usually a history array)
+        const responseData = result.data[0];
+        
+        if (Array.isArray(responseData) && responseData.length > 0) {
+            const lastItem = responseData[responseData.length - 1];
+            
+            // Case 1: List of lists [[user, bot], [user, bot]]
+            if (Array.isArray(lastItem)) {
+                return lastItem[1]; 
+            }
+            
+            // Case 2: List of objects [{role, content}, ...] (Newer Gradio)
+            if (lastItem && typeof lastItem === 'object' && lastItem.content) {
+                return lastItem.content;
+            }
+        }
+        
+        return responseData;
     } catch (e) {
         console.error("HF /chat failed, trying /predict or raw call:", e);
         // Fallback or specific handling if the endpoint name is different
