@@ -548,7 +548,7 @@ async function loadYiBianData() {
 
             // 初始化國考題庫
 
-            initExam();
+            // initExam(); // Removed to prevent duplicate listeners
 
         
 
@@ -771,7 +771,12 @@ function createYiBianCard(item) {
     if (isHerb) {
         categoryDisplay = item.category || '';
     } else {
-        categoryDisplay = item.categories ? item.categories[0] || '' : '';
+        // Fix: Handle categories being String or Array
+        if (Array.isArray(item.categories)) {
+            categoryDisplay = item.categories[0] || '';
+        } else {
+            categoryDisplay = item.categories || '';
+        }
     }
 
     // 獲取預覽內容
@@ -875,7 +880,9 @@ function openYiBianModal(item) {
         tag.textContent = item.category;
         categoryContainer.appendChild(tag);
     } else if (!isHerb && item.categories) {
-        item.categories.forEach(cat => {
+        // Fix: Handle categories being a String or Array
+        const cats = Array.isArray(item.categories) ? item.categories : [item.categories];
+        cats.forEach(cat => {
             const tag = document.createElement('span');
             tag.className = 'yibian-category-tag';
             tag.textContent = cat;
@@ -1326,8 +1333,8 @@ function removeMessage(id) {
 }
 
 async function callGeminiAPI(apiKey, prompt) {
-    // Use gemini-1.5-flash for stability
-    let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Use gemini-1.5-flash-001 for stability and specific versioning
+    let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${apiKey}`;
     
     // System prompt for a TCM expert assistant
     const systemInstruction = `你是一個專業的中醫藥材知識助手。你具備深厚的中醫理論基礎，特別擅長中藥材的性味、歸經、功效與主治。
