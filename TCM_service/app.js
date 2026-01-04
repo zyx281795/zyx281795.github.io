@@ -26,6 +26,10 @@ const PAGE_TITLES = {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('中醫藥材知識系統啟動中...');
 
+    // 強制移除可能存在的舊版狀態列 (防緩存)
+    const oldStatusBar = document.getElementById('app-status-bar');
+    if (oldStatusBar) oldStatusBar.remove();
+
     // 初始化導航
     initNavigation();
 
@@ -1295,14 +1299,10 @@ async function handleChatSubmit() {
         addMessage(botResponse, 'bot');
 
     } catch (error) {
-        console.warn('API Error, switching to mock response:', error);
-        
-        // Fallback to Mock Response (Keyword based) ensuring the demo continues smoothly
-        await new Promise(r => setTimeout(r, 1500)); // Simulate inference time
-        const mockResponse = generateMockResponse(userText);
-        
+        console.error('API Error:', error);
         removeMessage(loadingId);
-        addMessage(mockResponse, 'bot');
+        // 直接顯示錯誤訊息，不再使用制式化回覆
+        addMessage(`⚠️ 系統連線錯誤: ${error.message}\n請檢查網路連線或 API Key 設定。`, 'bot');
     }
 }
 
@@ -1356,9 +1356,12 @@ async function callGeminiAPI(apiKey, prompt) {
     請直接回答問題，不要提及你是 AI 或由 Google 開發。`;
     
     const payload = {
+        system_instruction: {
+            parts: { text: systemInstruction }
+        },
         contents: [{
             parts: [{
-                text: `${systemInstruction}\n\n用戶提問：${prompt}`
+                text: prompt
             }]
         }]
     };
