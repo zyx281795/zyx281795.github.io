@@ -1381,9 +1381,14 @@ function initChatbot() {
 
 async function handleChatSubmit() {
     const inputEl = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
     const userText = inputEl.value.trim();
 
     if (!userText) return;
+
+    // Disable input while processing
+    inputEl.disabled = true;
+    sendBtn.disabled = true;
 
     // 1. Add User Message
     addMessage(userText, 'user');
@@ -1395,6 +1400,11 @@ async function handleChatSubmit() {
     try {
         let botResponse;
         
+        // 檢查 Gradio Client 是否載入
+        if (!window.GradioClient) {
+            throw new Error("Gradio Client library not loaded.");
+        }
+
         // 嘗試呼叫主模型，設定逾時
         try {
             console.log(`[Chatbot] Attempting primary model: ${SYSTEM_CONFIG.hfSpaceId}`);
@@ -1421,27 +1431,30 @@ async function handleChatSubmit() {
     } catch (error) {
         console.error('[Chatbot] All models failed:', error);
         
-        // Fallback to Mock Response
-        await new Promise(r => setTimeout(r, 1000));
+        // Fallback to Mock Response (本地離線回復)
+        // 確保用戶總是能得到回應，不會卡住
+        await new Promise(r => setTimeout(r, 500));
         const mockResponse = generateMockResponse(userText);
         
         removeMessage(loadingId);
         addMessage(mockResponse, 'bot');
         updateStatus('無法連接到雲端模型，已切換至離線模式。', 'error');
+    } finally {
+        // Re-enable input
+        inputEl.disabled = false;
+        sendBtn.disabled = false;
+        inputEl.focus();
     }
 }
 
 async function callCustomModelAPI(prompt, spaceId) {
     console.log(`[Gradio] Connecting to ${spaceId}...`);
-    if (!window.GradioClient) {
-        throw new Error("Gradio Client library not loaded.");
-    }
-
+    
     try {
         const client = await window.GradioClient.connect(spaceId);
         console.log(`[Gradio] Connected to ${spaceId}`);
         
-        // 取得目前的對話紀錄 (供模型參考 context)
+        // 取得目前的對話紀錄
         const history = [];
         const messageEls = document.querySelectorAll('#chat-messages .message:not(.loading)');
         for (let i = 0; i < messageEls.length; i += 2) {
@@ -1450,22 +1463,39 @@ async function callCustomModelAPI(prompt, spaceId) {
             }
         }
 
-        // 嘗試 API
+        // 嘗試不同的 API 路徑與參數組合
         let result;
+        
+        // 1. 嘗試標準 ChatInterface (/chat)
         try {
-             console.log(`[Gradio] Trying /chat endpoint for ${spaceId}...`);
+             console.log(`[Gradio] Trying /chat endpoint...`);
              result = await client.predict("/chat", { 
-                message: prompt,
-                history: history
+                message: prompt, 
+                history: history 
             });
-            console.log(`[Gradio] /chat endpoint success`);
-        } catch (e) {
-             console.warn(`[Gradio] /chat endpoint failed, trying /predict...`, e);
-             result = await client.predict("/predict", { 
-                message: prompt,
-                history: history
-            });
-            console.log(`[Gradio] /predict endpoint success`);
+        } catch (e1) {
+            console.warn(`[Gradio] /chat failed, trying /predict...`, e1);
+            
+            // 2. 嘗試通用預測接口 (/predict)
+            try {
+                result = await client.predict("/predict", { 
+                    message: prompt, 
+                    history: history 
+                });
+            } catch (e2) {
+                console.warn(`[Gradio] /predict with history failed, trying simple message...`, e2);
+                
+                // 3. 嘗試最簡單的參數 (只傳 message，忽略 history，有些模型不支援 history 參數)
+                // 這對於某些自定義 Gradio App 很有用
+                // 注意：這裡假設輸入參數名仍為 text 或 message
+                try {
+                    result = await client.predict("/predict", [prompt]); 
+                } catch (e3) {
+                     // 最後嘗試無參數路徑 (有些 Space 只有一個 fn)
+                     // 但通常需要參數名
+                     throw new Error(`All API attempts failed for ${spaceId}`);
+                }
+            }
         }
 
         return result.data[0];
