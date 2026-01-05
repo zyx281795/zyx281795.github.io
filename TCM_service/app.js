@@ -1404,8 +1404,8 @@ function removeMessage(id) {
 }
 
 async function callGeminiAPI(apiKey, prompt) {
-    // Use gemini-2.5-flash (latest stable model)
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    // Use gemini-3-flash-preview
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
     // System prompt for a TCM expert assistant - merged into user message for v1 API
     const systemInstruction = `你是一個專業的中醫藥材知識助手。你具備深厚的中醫理論基礎，特別擅長中藥材的性味、歸經、功效與主治。
