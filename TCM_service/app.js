@@ -1342,7 +1342,15 @@ function updateDashboardExamStats() {
 
 // ========== 聊天機器人功能 (BianCang-Qwen2-7B) ==========
 const SYSTEM_CONFIG = {
-    apiKey: 'AIzaSyAl2Jy43bhdnvdtjm19qm3H8-XrCQzNffY'
+    apiKeys: [
+        'AIzaSyAl2Jy43bhdnvdtjm19qm3H8-XrCQzNffY', // Primary
+        'AIzaSyCFvmzT8T6kB3kBFDEYy7DFgWH6K3wrVPg'  // Backup
+    ],
+    currentKeyIndex: 0,
+    // Helper to get current key
+    get apiKey() {
+        return this.apiKeys[this.currentKeyIndex];
+    }
 };
 
 function initChatbot() {
@@ -1369,18 +1377,41 @@ async function handleChatSubmit() {
     const loadingId = addMessage('正在思考中...', 'bot', true);
 
     try {
-        // Real API Call using hardcoded key
+        // Attempt 1: Try with current key
         const botResponse = await callGeminiAPI(SYSTEM_CONFIG.apiKey, userText);
-
+        
         // Remove loading and add response
         removeMessage(loadingId);
         addMessage(botResponse, 'bot');
 
     } catch (error) {
-        console.error('API Error:', error);
+        console.warn(`Primary API call failed: ${error.message}`);
+
+        // Failover Logic: Check if we haven't tried the backup yet
+        // (Assuming currentKeyIndex 0 is primary, 1 is backup)
+        if (SYSTEM_CONFIG.currentKeyIndex === 0 && SYSTEM_CONFIG.apiKeys.length > 1) {
+            console.log('⚠️ Switching to Backup API Key due to error...');
+            SYSTEM_CONFIG.currentKeyIndex = 1; // Switch to backup key
+
+            try {
+                // Attempt 2: Retry with backup key
+                const retryResponse = await callGeminiAPI(SYSTEM_CONFIG.apiKey, userText);
+                
+                removeMessage(loadingId);
+                addMessage(retryResponse, 'bot');
+                // Optional: Notify user (or keep it silent for seamless experience)
+                // addMessage('(系統提示：已自動切換至備用線路)', 'system'); 
+                return;
+
+            } catch (retryError) {
+                console.error('Backup API also failed:', retryError);
+                // Both failed, fall through to error display
+            }
+        }
+
         removeMessage(loadingId);
-        // 直接顯示錯誤訊息，不再使用制式化回覆
-        addMessage(`⚠️ 系統連線錯誤: ${error.message}\n請檢查網路連線或 API Key 設定。`, 'bot');
+        // 直接顯示錯誤訊息
+        addMessage(`⚠️ 系統連線錯誤: ${error.message}\n已嘗試切換備用線路但仍失敗，請檢查網路連線。`, 'bot');
     }
 }
 
