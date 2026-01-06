@@ -1343,7 +1343,7 @@ function updateDashboardExamStats() {
 // ========== 聊天機器人功能 (BianCang-Qwen2-7B) ==========
 const SYSTEM_CONFIG = {
     apiKeys: [
-        'AIzaSyC2n6glm4x4mNijjsyXIGMk1Orv55bFZS4'
+        'AIzaSyCopDss71gt1_V43Czjo-lEWz4al533xrM'
     ],
     currentKeyIndex: 0,
     // Helper to get current key
