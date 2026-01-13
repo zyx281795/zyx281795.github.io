@@ -277,7 +277,7 @@ git push origin main
 
 3. **訪問**
 ```
-https://your-username.github.io/TCM_service/
+https://github.com/zyx281795/TCM-service.git
 ```
 ```
 
