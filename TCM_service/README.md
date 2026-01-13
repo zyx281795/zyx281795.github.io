@@ -228,7 +228,7 @@
 
 1. **下載專案**
 ```bash
-git clone https://github.com/your-repo/TCM_service.git
+git clone https://github.com/zyx281795/TCM-service.git
 cd TCM_service
 ```
 
