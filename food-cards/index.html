@@ -10,7 +10,7 @@
     :root{--bg:#f6f1e8;--paper:#fffdf8;--ink:#262521;--muted:#777268;--line:#d8d0c4;--accent:#e04f38;--shadow:0 18px 50px rgba(61,50,37,.12)}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:radial-gradient(circle at 12% 8%,rgba(224,79,56,.08),transparent 28rem),radial-gradient(circle at 88% 80%,rgba(226,165,72,.10),transparent 30rem),var(--bg)}
     a{color:inherit}.page{width:min(1120px,calc(100% - 32px));margin:0 auto;padding:64px 0 70px}.hero{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:end;margin-bottom:38px}.eyebrow{margin:0 0 12px;font-size:.78rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}h1{margin:0;font-family:Georgia,"Noto Serif TC","Songti TC",serif;font-size:clamp(2.6rem,6vw,5.2rem);line-height:.96;letter-spacing:-.045em}.subtitle{max-width:680px;margin:20px 0 0;color:var(--muted);line-height:1.8}.actions{display:flex;gap:10px;flex-wrap:wrap}.pill{display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid var(--line);border-radius:999px;background:rgba(255,253,248,.76);text-decoration:none;font-size:.88rem;font-weight:700}.pill.primary{background:#2c2b27;color:#fff;border-color:#2c2b27}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}.card{position:relative;min-height:325px;perspective:1200px;cursor:pointer;outline:none}.card-inner{position:absolute;inset:0;transition:transform 650ms cubic-bezier(.2,.78,.2,1);transform-style:preserve-3d}.card.is-flipped .card-inner{transform:rotateY(180deg)}.face{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:25px;border:1px solid var(--line);border-radius:25px;background:rgba(255,253,248,.95);box-shadow:var(--shadow);backface-visibility:hidden;overflow:hidden}.face::after{content:"";position:absolute;width:170px;height:170px;right:-72px;bottom:-82px;border:1px solid rgba(224,79,56,.18);border-radius:50%}.back{transform:rotateY(180deg);background:#2c2b27;color:#fffaf0;border-color:#2c2b27}.back::after{border-color:rgba(255,255,255,.12)}.card-no{display:flex;justify-content:space-between;gap:10px;font-size:.78rem;font-weight:800;letter-spacing:.1em;color:var(--muted)}.back .card-no{color:#bbb5aa}.emoji{font-size:2rem}.category{margin:auto 0 0;font-family:Georgia,"Noto Serif TC","Songti TC",serif;font-size:clamp(1.9rem,3vw,2.8rem);line-height:1.08;letter-spacing:-.04em}.micro{margin-top:14px;color:var(--muted);font-size:.84rem}.quote{color:var(--accent);font-family:Georgia,serif;font-size:4.6rem;line-height:.65;height:42px}.note{margin:18px 0 12px;font-family:Georgia,"Noto Serif TC","Songti TC",serif;font-size:clamp(1.25rem,2vw,1.65rem);line-height:1.55}.recommender{margin:0 0 20px;color:#bbb5aa;font-size:.82rem}.maps-link{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px 16px;border:1px solid rgba(255,255,255,.18);border-radius:15px;text-decoration:none;font-size:.92rem;font-weight:700;background:rgba(255,255,255,.08)}
-    .submit-section{margin-top:64px;padding:34px;border:1px solid var(--line);border-radius:30px;background:rgba(255,253,248,.88);box-shadow:var(--shadow)}.submit-head{display:grid;grid-template-columns:1.2fr .8fr;gap:30px;margin-bottom:26px}.submit-head h2{margin:0 0 10px;font-family:Georgia,"Noto Serif TC","Songti TC",serif;font-size:clamp(2rem,4vw,3.5rem);letter-spacing:-.035em}.submit-head p{margin:0;color:var(--muted);line-height:1.8}.flow{display:flex;gap:8px;flex-wrap:wrap;align-content:start}.flow span{padding:8px 11px;border:1px solid var(--line);border-radius:999px;font-size:.8rem;background:#fff}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}label{font-size:.84rem;font-weight:800}input,textarea,select{width:100%;border:1px solid var(--line);border-radius:14px;padding:13px 14px;background:#fffdf8;color:var(--ink);font:inherit;outline:none}input:focus,textarea:focus,select:focus{border-color:#bcae9f;box-shadow:0 0 0 3px rgba(224,79,56,.08)}textarea{min-height:118px;resize:vertical}.form-footer{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-top:18px}.privacy{max-width:620px;color:var(--muted);font-size:.78rem;line-height:1.6}.submit-btn{border:0;border-radius:14px;background:#2c2b27;color:#fff;padding:14px 20px;font:inherit;font-weight:800;cursor:pointer;white-space:nowrap}.submit-btn:disabled{opacity:.45;cursor:not-allowed}.status{display:none;margin-top:18px;padding:13px 15px;border-radius:14px;background:#eef6ec;color:#365a34;font-size:.88rem}.status.show{display:block}.setup-warning{display:none;margin-top:16px;padding:13px 15px;border-radius:14px;background:#fff0e8;color:#8b412c;font-size:.84rem;line-height:1.6}.setup-warning.show{display:block}.empty{grid-column:1/-1;padding:34px;text-align:center;color:var(--muted)}footer{display:flex;justify-content:space-between;gap:20px;margin-top:34px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:.82rem}
+    .submit-section{margin-top:64px;padding:34px;border:1px solid var(--line);border-radius:30px;background:rgba(255,253,248,.88);box-shadow:var(--shadow)}.submit-head{display:grid;grid-template-columns:1.2fr .8fr;gap:30px;margin-bottom:26px}.submit-head h2{margin:0 0 10px;font-family:Georgia,"Noto Serif TC","Songti TC",serif;font-size:clamp(2rem,4vw,3.5rem);letter-spacing:-.035em}.submit-head p{margin:0;color:var(--muted);line-height:1.8}.flow{display:flex;gap:8px;flex-wrap:wrap;align-content:start}.flow span{padding:8px 11px;border:1px solid var(--line);border-radius:999px;font-size:.8rem;background:#fff}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}label{font-size:.84rem;font-weight:800}input,textarea,select{width:100%;border:1px solid var(--line);border-radius:14px;padding:13px 14px;background:#fffdf8;color:var(--ink);font:inherit;outline:none}input:focus,textarea:focus,select:focus{border-color:#bcae9f;box-shadow:0 0 0 3px rgba(224,79,56,.08)}textarea{min-height:118px;resize:vertical}.form-footer{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-top:18px}.privacy{max-width:620px;color:var(--muted);font-size:.78rem;line-height:1.6}.submit-btn{border:0;border-radius:14px;background:#2c2b27;color:#fff;padding:14px 20px;font:inherit;font-weight:800;cursor:pointer;white-space:nowrap}.submit-btn:disabled{opacity:.45;cursor:not-allowed}.status{display:none;margin-top:18px;padding:13px 15px;border-radius:14px;background:#eef6ec;color:#365a34;font-size:.88rem;line-height:1.6}.status.show{display:block}.status.error{background:#fff0e8;color:#8b412c}.empty{grid-column:1/-1;padding:34px;text-align:center;color:var(--muted)}footer{display:flex;justify-content:space-between;gap:20px;margin-top:34px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:.82rem}
     @media(max-width:880px){.hero,.submit-head{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.actions{justify-content:flex-start}}
     @media(max-width:580px){.page{width:min(100% - 22px,1120px);padding-top:34px}.cards,.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.card{min-height:310px}.submit-section{padding:22px;border-radius:22px}.form-footer{align-items:stretch;flex-direction:column}.submit-btn{width:100%}footer{flex-direction:column}}
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition-duration:.01ms!important}}
@@ -35,7 +35,7 @@
         <div class="flow"><span>① 你投稿</span><span>→</span><span>② Email 審核</span><span>→</span><span>③ 核准</span><span>→</span><span>④ 自動發布</span></div>
       </div>
 
-      <form id="recommendForm" method="POST" target="submissionFrame">
+      <form id="recommendForm" method="POST" target="submissionFrame" action="https://script.google.com/macros/s/AKfycbw9VYDSqAEyCYBl_J2kpx_NvMP4X5n6unvS2cW6AxtbjlaxU73u3DJ2lYjgh4B8Qujj/exec">
         <div class="form-grid">
           <div class="field"><label for="name">餐廳 / 店家名稱 *</label><input id="name" name="name" maxlength="80" required placeholder="例：某某拉麵" /></div>
           <div class="field"><label for="recommender">你的名字 / 暱稱</label><input id="recommender" name="recommender" maxlength="60" placeholder="不填則顯示匿名推薦者" /></div>
@@ -46,16 +46,15 @@
           <input type="hidden" name="micro" value="Community recommendation" />
         </div>
         <div class="form-footer"><div class="privacy">投稿內容會用於公開美食字卡；只有你主動填寫的暱稱會顯示。送出後仍須站長審核，不代表一定刊登。</div><button id="submitBtn" class="submit-btn" type="submit">送出推薦 →</button></div>
-        <div id="status" class="status">投稿已送出！審核通過後會自動出現在這裡。</div>
-        <div id="setupWarning" class="setup-warning">投稿功能正在設定中；目前還不能送出，但現有字卡可以正常瀏覽。</div>
+        <div id="status" class="status" role="status" aria-live="polite"></div>
       </form>
-      <iframe name="submissionFrame" title="投稿結果" style="display:none"></iframe>
+      <iframe id="submissionFrame" name="submissionFrame" title="投稿結果" style="display:none"></iframe>
     </section>
 
     <footer><span>Community food cards · reviewed before publishing</span><span>Powered by GitHub Pages + Google Apps Script</span></footer>
   </main>
 
-  <script src="./config.js"></script>
+  <script src="./config.js?v=20260907-2"></script>
   <script>
     const cardsEl=document.getElementById('cards');
     const escapeHTML=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -67,15 +66,44 @@
       cardsEl.querySelectorAll('.card').forEach(card=>{const toggle=()=>card.classList.toggle('is-flipped');card.addEventListener('click',e=>{if(!e.target.closest('a'))toggle()});card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}})});
     }
 
-    fetch('./restaurants.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('load failed');return r.json()}).then(renderCards).catch(()=>{cardsEl.innerHTML='<div class="empty">美食卡載入失敗，請稍後再試。</div>'});
+    fetch('./restaurants.json?v='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('load failed');return r.json()}).then(renderCards).catch(()=>{cardsEl.innerHTML='<div class="empty">美食卡載入失敗，請稍後再試。</div>'});
 
+    const FALLBACK_ENDPOINT='https://script.google.com/macros/s/AKfycbw9VYDSqAEyCYBl_J2kpx_NvMP4X5n6unvS2cW6AxtbjlaxU73u3DJ2lYjgh4B8Qujj/exec';
     const form=document.getElementById('recommendForm');
     const btn=document.getElementById('submitBtn');
     const status=document.getElementById('status');
-    const warning=document.getElementById('setupWarning');
-    const endpoint=window.FOOD_CARDS_CONFIG&&window.FOOD_CARDS_CONFIG.submissionEndpoint;
-    if(endpoint){form.action=endpoint}else{btn.disabled=true;warning.classList.add('show')}
-    form.addEventListener('submit',()=>{if(!endpoint)return;btn.disabled=true;btn.textContent='正在送出…';setTimeout(()=>{status.classList.add('show');form.reset();btn.disabled=false;btn.textContent='送出推薦 →';status.scrollIntoView({behavior:'smooth',block:'nearest'})},1100)});
+    const frame=document.getElementById('submissionFrame');
+    const endpoint=(window.FOOD_CARDS_CONFIG&&window.FOOD_CARDS_CONFIG.submissionEndpoint)||FALLBACK_ENDPOINT;
+    form.action=endpoint;
+    btn.disabled=false;
+
+    let pendingSubmit=false;
+    form.addEventListener('submit',e=>{
+      if(!form.reportValidity()){e.preventDefault();return}
+      pendingSubmit=true;
+      btn.disabled=true;
+      btn.textContent='正在送出…';
+      status.className='status show';
+      status.textContent='正在把推薦送到審核系統，請稍候…';
+    });
+
+    frame.addEventListener('load',()=>{
+      if(!pendingSubmit)return;
+      pendingSubmit=false;
+      status.className='status show';
+      status.textContent='投稿已送出！請到站長信箱確認是否收到審核信。';
+      form.reset();
+      btn.disabled=false;
+      btn.textContent='送出推薦 →';
+      status.scrollIntoView({behavior:'smooth',block:'nearest'});
+    });
+
+    setInterval(()=>{
+      if(pendingSubmit && btn.disabled){
+        btn.disabled=false;
+        btn.textContent='重新送出 →';
+      }
+    },10000);
   </script>
 </body>
 </html>
