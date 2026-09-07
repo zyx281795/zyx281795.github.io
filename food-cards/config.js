@@ -1,5 +1,3 @@
 window.FOOD_CARDS_CONFIG = {
-  // Deploy food-cards/apps-script/Code.gs as a Google Apps Script Web App,
-  // then paste the /exec URL here.
-  submissionEndpoint: ""
+  submissionEndpoint: "https://script.google.com/macros/s/AKfycbw9VYDSqAEyCYBl_J2kpx_NvMP4X5n6unvS2cW6AxtbjlaxU73u3DJ2lYjgh4B8Qujj/exec"
 };
