@@ -48,5 +48,15 @@
     "note": "份量大又便宜的蛋餅。",
     "mapUrl": "https://maps.app.goo.gl/7YECiMMJyokY2bZt6?g_st=ipc",
     "recommender": ""
+  },
+  {
+    "id": "community-5289bf74-b38a-49c8-bbc7-9fd48919fb10",
+    "name": "飯飯",
+    "category": "竹科店 金山街附近 燒肉丼飯",
+    "emoji": "🍽️",
+    "micro": "Community recommendation",
+    "note": "很常吃",
+    "mapUrl": "https://maps.app.goo.gl/T8nss8VQCyrygTmc8",
+    "recommender": "Test"
   }
 ]
