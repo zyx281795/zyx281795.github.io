@@ -1,0 +1,52 @@
+[
+  {
+    "id": "food-01",
+    "name": "嫩肉系料理",
+    "category": "嫩肉系料理",
+    "emoji": "🥩",
+    "micro": "Tender meat · 收藏理由翻面看",
+    "note": "這家的肉都很嫩。",
+    "mapUrl": "https://maps.app.goo.gl/JKZvLfo4FiiwPEpV8?g_st=ipc",
+    "recommender": ""
+  },
+  {
+    "id": "food-02",
+    "name": "柚香拉麵",
+    "category": "柚香拉麵",
+    "emoji": "🍜",
+    "micro": "Yuzu ramen · 清湯派注意",
+    "note": "柚香拉麵我喜歡，喜歡清湯的可以考慮這家。",
+    "mapUrl": "https://maps.app.goo.gl/UCHNZCLwtBmKyZpY9?g_st=ipc",
+    "recommender": ""
+  },
+  {
+    "id": "food-03",
+    "name": "芋圓 × 地瓜圓",
+    "category": "芋圓 × 地瓜圓",
+    "emoji": "🍠",
+    "micro": "Taro & sweet potato balls",
+    "note": "這家的芋圓地瓜圓，我覺得比清大的立晉好吃。",
+    "mapUrl": "https://maps.app.goo.gl/BaUcdYENvkhmkLTE8?g_st=ipc",
+    "recommender": ""
+  },
+  {
+    "id": "food-04",
+    "name": "頂級臭豆腐",
+    "category": "頂級臭豆腐",
+    "emoji": "🔥",
+    "micro": "Stinky tofu · 強力推薦",
+    "note": "目前吃過最頂的臭豆腐。",
+    "mapUrl": "https://maps.app.goo.gl/uSYAiQqGpnuUkN4Z7?g_st=ipc",
+    "recommender": ""
+  },
+  {
+    "id": "food-05",
+    "name": "大份量蛋餅",
+    "category": "大份量蛋餅",
+    "emoji": "🍳",
+    "micro": "Egg pancake · 高 CP 值",
+    "note": "份量大又便宜的蛋餅。",
+    "mapUrl": "https://maps.app.goo.gl/7YECiMMJyokY2bZt6?g_st=ipc",
+    "recommender": ""
+  }
+]
